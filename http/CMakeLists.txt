@@ -1,60 +1,26 @@
 cmake_minimum_required(VERSION 3.0)
 
+# storage of custom FindLibMagic.cmake
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
 
+#set(LIBMAGIC_FIND_QUIETLY ON)
 find_package(LibMagic REQUIRED)
 
-add_library(http SHARED
-    legacy/Client.h
-    tls/Client.h
-    legacy/Server.h
-    tls/Server.h
-    Client.h
-    ClientContext.cpp
-    ClientContext.h
-    CookieOptions.h
-    Parser.cpp
-    Parser.h
-    RequestParser.cpp
-    RequestParser.h
-    ResponseParser.cpp
-    ResponseParser.h
-    Server.h
-    ServerContext.cpp
-    ServerContext.h
-    ServerResponse.cpp
-    ServerResponse.h
-    StatusCodes.cpp
-    StatusCodes.h
-    MimeTypes.cpp
-    MimeTypes.h
-    Request.cpp
-    Request.h
-    Response.cpp
-    Response.h
-    http_utils.cpp
-    http_utils.h
-)
-
-target_link_libraries(http LINK_PUBLIC net logger utils ${LIBMAGIC_LIBRARIES})
-
-target_compile_options(http PRIVATE --warn-all)
+add_library(http SHARED WebApp.cpp HTTPContext.cpp HTTPStatusCodes.cpp MimeTypes.cpp Request.cpp Response.cpp httputils.cpp Router.cpp)
 
 set_target_properties(http PROPERTIES
-            CXX_STANDARD 20
-            CXX_STANDARD_REQUIRED ON
+            CXX_STANDARD 17
             CXX_EXTENSIONS OFF
-            SOVERSION 1
 )
 
-FILE(GLOB includes "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+target_include_directories(http PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR} ${LIBMAGIC_INCLUDEs})
+target_link_libraries(http LINK_PUBLIC net ${LIBMAGIC_LIBRARIES})
 
-set_target_properties(http PROPERTIES PUBLIC_HEADER "${includes}")
 
-target_include_directories(http PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${LIBMAGIC_INCLUDES})
 
-install(TARGETS http LIBRARY DESTINATION lib NAMELINK_COMPONENT libhttp.so.1)
 
-if(CHECK_INCLUDES)
-    set_property(TARGET http PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path_and_options})
-endif(CHECK_INCLUDES)
+#find_program(iwyu_path NAMES include-what-you-use iwyu)
+#if(NOT iwyu_path)
+#  message(FATAL_ERROR "Could not find the program include-what-you-use")
+#endif()
+#set_property(TARGET http PROPERTY CXX_INCLUDE_WHAT_YOU_USE ${iwyu_path})
